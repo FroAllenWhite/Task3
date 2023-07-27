@@ -14,7 +14,7 @@ class LoginForm extends Model
         return [
             [['email', 'password'], 'required'],
             ['email', 'email'],
-            ['password', 'validatePassword'],
+            'password' => [['password'], 'string', 'max' => 60, 'min' => 8],
         ];
     }
 
@@ -26,17 +26,12 @@ class LoginForm extends Model
         ];
     }
 
-    public function validatePassword($attribute, $params)
-    {
-        if (!$this->hasErrors()) {
 
-        }
-    }
 
     public function login()
     {
         if ($this->validate()) {
-
+            return true;
         }
 
         return false;

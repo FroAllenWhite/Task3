@@ -4,12 +4,14 @@ namespace app\controllers;
 
 use app\models\LoginForm;
 use app\models\SignupForm;
+use app\models\User;
 use Yii;
 use yii\debug\models\search\Log;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\Response;
 use yii\filters\VerbFilter;
+
 
 class SiteController extends Controller
 {
@@ -88,8 +90,15 @@ class SiteController extends Controller
         $model = new SignupForm();
 
         if ($model->load(Yii::$app->request->post()) && $model->signup()) {
-            // Регистрация прошла успешно, выполните действия, например, перенаправление на главную страницу.
-            return $this->goHome();
+            $user = new User();
+            $user->fio = $model->fio;
+            $user->email = $model->email;
+            $user->password = Yii::$app->security->generatePasswordHash($model->password);
+            $user->phone = $model->phone;
+            $user->date_create = date('Y-m-d H:i:s');
+            $user->save();
+
+            return $this->redirect(['login']);
         }
 
         return $this->render('signup', [
