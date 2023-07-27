@@ -12,19 +12,23 @@ class SignupForm extends Model
     public $phone;
     public $date_create;
     public $password1;
-
+    public $verifyCode;
+    public $activationCode;
     public function rules()
     {
         return [
-            [['fio', 'email', 'password', 'phone', 'password1'], 'required'],
-            ['fio', 'string', 'max'=> 60, 'min' =>6],
+            [['fio', 'email', 'password', 'phone', 'password1', 'verifyCode'], 'required'],
+            ['fio', 'string', 'max' => 60, 'min' => 6],
             ['fio', 'fioPattern'],
             ['phone', 'phonePattern'],
             ['email', 'email'],
-            ['password', 'string', 'min'=>8, 'max'=>30],
+            ['password', 'string', 'min' => 8, 'max' => 30],
             ['password1', 'compare', 'compareAttribute' => 'password', 'message' => 'Пароли не совпадают.'],
             ['phone', 'validateUniquePhone'],
             ['email', 'validateUniqueEmail'],
+            ['verifyCode', 'captcha'],
+            [['activationCode'], 'required', 'on' => 'activation'],
+            [['activationCode'], 'string', 'length' => 8],
         ];
     }
     public function fioPattern($attribute, $params)
@@ -70,6 +74,7 @@ class SignupForm extends Model
             'password' => 'Пароль',
             'phone' => 'Номер телефона',
             'password1' => 'Повторите пароль',
+            'verifyCode' => 'Введите код с картинки',
         ];
     }
 
@@ -80,5 +85,18 @@ class SignupForm extends Model
         }
 
         return false;
+    }
+    /**
+     *
+     * @param string $attribute
+     * @param array $params
+     */
+    public function validateActivationCode($attribute, $params)
+    {
+        if (!$this->hasErrors()) {
+            if ($this->activationCode !== 'ваш_сгенерированный_код_активации') {
+                $this->addError($attribute, 'Неверный код активации.');
+            }
+        }
     }
 }

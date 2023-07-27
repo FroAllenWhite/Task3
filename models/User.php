@@ -67,7 +67,6 @@ class User extends ActiveRecord implements IdentityInterface
      */
     public function validatePassword($password)
     {
-        // Используем метод validatePassword() только один раз для проверки пароля.
         return Yii::$app->security->validatePassword($password, $this->password);
     }
 }
