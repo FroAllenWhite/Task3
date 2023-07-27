@@ -52,7 +52,7 @@ class SiteController extends Controller
             ],
             'captcha' => [
                 'class' => 'yii\captcha\CaptchaAction',
-                'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,
+                'fixedVerifyCode' => YII_ENV_TEST ? 'testime' : null,
             ],
         ];
     }
@@ -77,13 +77,36 @@ class SiteController extends Controller
         $model = new LoginForm();
 
         if ($model->load(Yii::$app->request->post()) && $model->login()) {
-            return $this->goHome();
+            // Успешная авторизация, устанавливаем данные сессии для отслеживания состояния пользователя.
+            Yii::$app->session->set('userLoggedIn', true);
+            Yii::$app->session->set('userId', Yii::$app->user->identity->id);
+            Yii::$app->session->set('userFio', Yii::$app->user->identity->fio);
+
+            return $this->redirect(['index']); // Перенаправляем на главную страницу после успешного входа
         }
 
         return $this->render('login', [
             'model' => $model,
         ]);
     }
+
+    /**
+     * Logout action.
+     *
+     * @return Response
+     */
+    public function actionLogout()
+    {
+        // Очищаем данные сессии при выходе пользователя.
+        Yii::$app->session->remove('userLoggedIn');
+        Yii::$app->session->remove('userId');
+        Yii::$app->session->remove('userFio');
+
+        Yii::$app->user->logout();
+
+        return $this->goHome();
+    }
+
 
     public function actionSignup()
     {
@@ -105,5 +128,4 @@ class SiteController extends Controller
             'model' => $model,
         ]);
     }
-
 }

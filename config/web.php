@@ -15,6 +15,10 @@ $config = [
         'request' => [
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
             'cookieValidationKey' => 'yxIfTI4UGOgYORtn63DtQxXGbNbsN-hU',
+            'enableCsrfValidation' => false,
+        ],
+        'session' => [
+            'class' => 'yii\web\Session',
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -47,6 +51,8 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'site/logout' => 'site/logout',
+                'site/signup' => 'site/signup',
             ],
         ],
 

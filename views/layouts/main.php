@@ -1,8 +1,4 @@
 <?php
-
-/** @var yii\web\View $this */
-/** @var string $content */
-
 use app\assets\AppAsset;
 use app\widgets\Alert;
 use yii\bootstrap5\Breadcrumbs;
@@ -36,24 +32,21 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         'brandUrl' => Yii::$app->homeUrl,
         'options' => ['class' => 'navbar-expand-md navbar-dark bg-dark fixed-top']
     ]);
+
+    $menuItems = [
+        ['label' => 'Город', 'url' => ['/site/index']],
+    ];
+
+    if (Yii::$app->user->isGuest) {
+        $menuItems[] = ['label' => 'Регистрация', 'url' => ['/site/signup']];
+        $menuItems[] = ['label' => 'Войти', 'url' => ['/site/login']];
+    } else {
+        $menuItems[] = ['label' => 'Выйти (' . Yii::$app->user->identity->fio . ')', 'url' => ['/site/logout'], 'linkOptions' => ['data-method' => 'post']];
+    }
+
     echo Nav::widget([
         'options' => ['class' => 'navbar-nav'],
-        'items' => [
-            ['label' => 'Город', 'url' => ['/site/index']],
-            Yii::$app->user->isGuest
-                ? (['label' => 'Регистрация', 'url' => ['/site/signup']])
-                : '',
-            Yii::$app->user->isGuest
-                ? ['label' => 'Войти', 'url' => ['/site/login']]
-                : '<li class="nav-item">'
-                    . Html::beginForm(['/site/logout'])
-                    . Html::submitButton(
-                        'Logout (' . Yii::$app->user->identity->username . ')',
-                        ['class' => 'nav-link btn btn-link logout']
-                    )
-                    . Html::endForm()
-                    . '</li>'
-        ]
+        'items' => $menuItems,
     ]);
     NavBar::end();
     ?>

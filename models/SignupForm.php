@@ -29,7 +29,7 @@ class SignupForm extends Model
     }
     public function fioPattern($attribute, $params)
     {
-        $pattern = '/^[а-яА-ЯёЁa-zA-Z\s-]+$/u'; // Регулярное выражение для проверки ФИО на наличие только букв.
+        $pattern = '/^[а-яА-ЯёЁa-zA-Z\s-]+$/u';
         if (!preg_match($pattern, $this->$attribute)) {
             $this->addError($attribute, 'ФИО должно содержать только буквы.');
         }
@@ -37,7 +37,7 @@ class SignupForm extends Model
 
     public function phonePattern($attribute, $params)
     {
-        $pattern = '/^(\+7|8)\d{10}$/'; // Регулярное выражение для проверки формата номера телефона.
+        $pattern = '/^(\+7|8)\d{10}$/';
         if (!preg_match($pattern, $this->$attribute)) {
             $this->addError($attribute, 'Номер телефона должен быть вида 8********** или +7**********.');
         }
