@@ -2,7 +2,9 @@
 
 namespace app\controllers;
 
+use app\models\City;
 use app\models\LoginForm;
+use app\models\Review;
 use app\models\SignupForm;
 use app\models\User;
 use Yii;
@@ -115,13 +117,10 @@ class SiteController extends Controller
             Yii::$app->session->set('captcha', $model->verifyCode);
             if ($this->validateCaptcha($model->verifyCode)) {
                 if ($model->signup()) {
-                    $activationCode = Yii::$app->security->generateRandomString(8);
-                    $this->sendActivationEmail($model->email, $activationCode);
+//                    $activationCode = Yii::$app->security->generateRandomString(8);
+//                    $this->sendActivationEmail($model->email, $activationCode);
 
-                    return $this->render('signup-success', [
-                        'model' => $model,
-                        'email' => $model->email,
-                    ]);
+                    return $this->redirect(['login']);
                 }
             } else {
                 $model->addError('verifyCode', 'Неверный код с картинки.');
@@ -133,22 +132,22 @@ class SiteController extends Controller
         ]);
     }
 
-    /**
-     *
-     * @param string $email
-     * @param string $activationCode
-     */
-    protected function sendActivationEmail($email, $activationCode)
-    {
-        $subject = 'Активация аккаунта';
-        $message = 'Код активации: ' . $activationCode;
-        Yii::$app->mailer->compose()
-            ->setTo($email)
-            ->setFrom([Yii::$app->params['adminEmail'] => Yii::$app->name])
-            ->setSubject($subject)
-            ->setTextBody($message)
-            ->send();
-    }
+//    /**
+//     *
+//     * @param string $email
+//     * @param string $activationCode
+//     */
+//    protected function sendActivationEmail($email, $activationCode)
+//    {
+//        $subject = 'Активация аккаунта';
+//        $message = 'Код активации: ' . $activationCode;
+//        Yii::$app->mailer->compose()
+//            ->setTo($email)
+//            ->setFrom([Yii::$app->params['adminEmail'] => Yii::$app->name])
+//            ->setSubject($subject)
+//            ->setTextBody($message)
+//            ->send();
+//    }
 
     /**
      *
@@ -170,4 +169,91 @@ class SiteController extends Controller
 
         return true;
     }
+
+    public function actionCheckCity()
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $city = Yii::$app->request->post('city');
+        $exists = City::find()->where(['name' => $city])->exists();
+        return ['exists' => $exists];
+    }
+
+    public function actionAddCity()
+    {
+        $city = Yii::$app->request->post('city');
+
+
+        var_dump($city);
+
+
+        if (!empty($city)) {
+            $newCity = new City(['name' => $city, 'date_create' => date('Y-m-d H:i:s')]);
+            $newCity->save();
+        } else {
+            throw new \yii\web\BadRequestHttpException('Пустое значение города');
+        }
+    }
+
+    public function actionStoreCityInSession()
+    {
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        $city = Yii::$app->request->post('city');
+        $timestamp = Yii::$app->request->post('timestamp');
+
+        $session = Yii::$app->session;
+        $session->set('city', $city);
+        $session->set('city_timestamp', $timestamp);
+
+        return ['success' => true];
+    }
+    public function actionAllCitiesModal()
+    {
+        return $this->renderAjax('_all_cities_modal');
+    }
+    public function actionCity($cityId)
+    {
+        $city = City::findOne($cityId);
+
+        if (!$city) {
+            throw new \yii\web\NotFoundHttpException('Город не найден.');
+        }
+
+        $cityList = City::find()->orderBy(['name' => SORT_ASC])->all();
+        $model = new Review();
+
+        return $this->render('city', [
+            'cityName' => $city->name,
+            'model' => $model,
+            'cityList' => $cityList,
+        ]);
+    }
+
+    public function actionSubmitReview()
+    {
+        $model = new Review();
+
+        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+            $selectedCityId = $model->id_city;
+            $city = City::findOne($selectedCityId);
+
+            if (!$city) {
+                throw new \yii\web\NotFoundHttpException('Город не найден.');
+            }
+            $model->id_author = Yii::$app->user->identity->id;
+
+            if ($model->save()) {
+                Yii::$app->session->setFlash('reviewSubmitted', 'Ваш отзыв отправлен');
+                return $this->redirect(['index']);
+            }
+        }
+
+        $cityList = City::find()->orderBy(['name' => SORT_ASC])->all();
+
+        return $this->render('city', [
+            'model' => $model,
+            'cityList' => $cityList,
+        ]);
+    }
+
 }

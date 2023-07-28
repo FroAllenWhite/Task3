@@ -1,6 +1,7 @@
 <?php
-use yii\helpers\Html;
 use yii\widgets\ActiveForm;
+use yii\helpers\Url;
+use yii\bootstrap5\Html;
 
 $this->title = 'Регистрация завершена';
 $this->params['breadcrumbs'][] = $this->title;

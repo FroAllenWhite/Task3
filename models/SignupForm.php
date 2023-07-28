@@ -14,6 +14,7 @@ class SignupForm extends Model
     public $password1;
     public $verifyCode;
     public $activationCode;
+
     public function rules()
     {
         return [
@@ -31,6 +32,7 @@ class SignupForm extends Model
             [['activationCode'], 'string', 'length' => 8],
         ];
     }
+
     public function fioPattern($attribute, $params)
     {
         $pattern = '/^[а-яА-ЯёЁa-zA-Z\s-]+$/u';
@@ -46,6 +48,7 @@ class SignupForm extends Model
             $this->addError($attribute, 'Номер телефона должен быть вида 8********** или +7**********.');
         }
     }
+
     public function validateUniquePhone($attribute, $params)
     {
         if (!$this->hasErrors()) {
@@ -81,22 +84,32 @@ class SignupForm extends Model
     public function signup()
     {
         if ($this->validate()) {
-            return true;
-        }
+            $user = new User();
+            $user->fio = $this->fio;
+            $user->email = $this->email;
+            $user->password = password_hash($this->password, PASSWORD_BCRYPT);
+            $user->phone = $this->phone;
+            $user->date_create = date('Y-m-d H:i:s');
 
-        return false;
-    }
-    /**
-     *
-     * @param string $attribute
-     * @param array $params
-     */
-    public function validateActivationCode($attribute, $params)
-    {
-        if (!$this->hasErrors()) {
-            if ($this->activationCode !== 'ваш_сгенерированный_код_активации') {
-                $this->addError($attribute, 'Неверный код активации.');
+            // Save the user record to the database
+            if ($user->save()) {
+                return true;
             }
+
+            return false;
         }
+        /**
+         *
+         * @param string $attribute
+         * @param array $params
+         */
+//    public function validateActivationCode($attribute, $params)
+//    {
+//        if (!$this->hasErrors()) {
+//            if ($this->activationCode !== 'ваш_сгенерированный_код_активации') {
+//                $this->addError($attribute, 'Неверный код активации.');
+//            }
+//        }
+//    }
     }
 }
