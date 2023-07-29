@@ -16,8 +16,4 @@ $this->title = "Информация об авторе: " . Html::encode($author
 <?php endif; ?>
 
 
-
-
-
-
 <?php $this->endContent(); ?>

@@ -17,12 +17,8 @@ use yii\web\Response;
 use yii\filters\VerbFilter;
 use yii\web\UploadedFile;
 
-
 class SiteController extends Controller
 {
-    /**
-     * {@inheritdoc}
-     */
     public function behaviors()
     {
         return [
@@ -46,9 +42,6 @@ class SiteController extends Controller
         ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function actions()
     {
         return [
@@ -62,21 +55,11 @@ class SiteController extends Controller
         ];
     }
 
-    /**
-     * Displays homepage.
-     *
-     * @return string
-     */
     public function actionIndex()
     {
         return $this->render('index');
     }
 
-    /**
-     * Login action.
-     *
-     * @return Response|string
-     */
     public function actionLogin()
     {
         $model = new LoginForm();
@@ -85,7 +68,6 @@ class SiteController extends Controller
             Yii::$app->session->set('userLoggedIn', true);
             Yii::$app->session->set('userId', Yii::$app->user->identity->id);
             Yii::$app->session->set('userFio', Yii::$app->user->identity->fio);
-
             return $this->redirect(['index']);
         }
 
@@ -94,11 +76,6 @@ class SiteController extends Controller
         ]);
     }
 
-    /**
-     * Logout action.
-     *
-     * @return Response
-     */
     public function actionLogout()
     {
         Yii::$app->session->remove('userLoggedIn');
@@ -110,7 +87,6 @@ class SiteController extends Controller
         return $this->goHome();
     }
 
-
     public function actionSignup()
     {
         $model = new SignupForm();
@@ -119,9 +95,8 @@ class SiteController extends Controller
             Yii::$app->session->set('captcha', $model->verifyCode);
             if ($this->validateCaptcha($model->verifyCode)) {
                 if ($model->signup()) {
-//                    $activationCode = Yii::$app->security->generateRandomString(8);
-//                    $this->sendActivationEmail($model->email, $activationCode);
-
+                    // $activationCode = Yii::$app->security->generateRandomString(8);
+                    // $this->sendActivationEmail($model->email, $activationCode);
                     return $this->redirect(['login']);
                 }
             } else {
@@ -134,30 +109,6 @@ class SiteController extends Controller
         ]);
     }
 
-//    /**
-//     *
-//     * @param string $email
-//     * @param string $activationCode
-//     */
-//    protected function sendActivationEmail($email, $activationCode)
-//    {
-//        $subject = 'Активация аккаунта';
-//        $message = 'Код активации: ' . $activationCode;
-//        Yii::$app->mailer->compose()
-//            ->setTo($email)
-//            ->setFrom([Yii::$app->params['adminEmail'] => Yii::$app->name])
-//            ->setSubject($subject)
-//            ->setTextBody($message)
-//            ->send();
-//    }
-
-    /**
-     *
-     *
-     * @param string $code
-     * @return bool
-     * @throws BadRequestHttpException
-     */
     protected function validateCaptcha($code)
     {
         $session = Yii::$app->session;
@@ -184,13 +135,12 @@ class SiteController extends Controller
     {
         $city = Yii::$app->request->post('city');
 
-
-        var_dump($city);
-
-
         if (!empty($city)) {
-            $newCity = new City(['name' => $city, 'date_create' => date('Y-m-d H:i:s')]);
-            $newCity->save();
+            $existingCity = City::find()->where(['name' => $city])->one();
+            if (!$existingCity) {
+                $newCity = new City(['name' => $city, 'date_create' => date('Y-m-d H:i:s')]);
+                $newCity->save();
+            }
         } else {
             throw new \yii\web\BadRequestHttpException('Пустое значение города');
         }
@@ -198,7 +148,6 @@ class SiteController extends Controller
 
     public function actionStoreCityInSession()
     {
-
         Yii::$app->response->format = Response::FORMAT_JSON;
         $city = Yii::$app->request->post('city');
         $timestamp = Yii::$app->request->post('timestamp');
@@ -209,10 +158,12 @@ class SiteController extends Controller
 
         return ['success' => true];
     }
+
     public function actionAllCitiesModal()
     {
         return $this->renderAjax('_all_cities_modal');
     }
+
     public function actionCity($cityId)
     {
         $city = City::findOne($cityId);
@@ -221,9 +172,7 @@ class SiteController extends Controller
             throw new \yii\web\NotFoundHttpException('Город не найден.');
         }
 
-
         $cityList = City::find()->orderBy(['name' => SORT_ASC])->all();
-
 
         $model = new Review();
 
@@ -277,6 +226,7 @@ class SiteController extends Controller
             'cityList' => $cityList,
         ]);
     }
+
     public function actionCityReviews($cityId)
     {
         $city = City::findOne($cityId);
@@ -305,6 +255,7 @@ class SiteController extends Controller
             'author' => $author,
         ]);
     }
+
     public function actionAuthorReviews($authorId)
     {
         $author = User::findOne($authorId);

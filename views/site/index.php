@@ -17,7 +17,7 @@ $this->title = 'Города';
     <?php
     // Определение города пользователя по IP
     // $ip = Yii::$app->request->userIP;
-    $ip = '78.85.5.98';
+    $ip = '92.255.196.137';
     $city = null;
     $request = file_get_contents('http://ipwho.is/' . $ip . '?lang=ru');
     $request = json_decode($request, true);
@@ -30,7 +30,7 @@ $this->title = 'Города';
 
     $session = Yii::$app->session;
 
-    if ($session->has('city') && $session->get('city_timestamp') >= time() -  2 * 3600 ) {
+    if ($session->has('city') && $session->get('city_timestamp') >= time()  - 2 * 3600 ) {
         $city = $session->get('city');
     } else {
         Modal::begin([
@@ -50,25 +50,29 @@ $this->title = 'Города';
 
         $this->registerJs("
             $('#cityModal').modal('show');
-
+    
             $('#yes').click(() => {
                 var city = '{$city}';
                 window.location.href = '" . Url::to(['index']) . "';
                 $('#cityModal').modal('hide');
-                // Store the city information and timestamp in the session
                 $.ajax({
                     url: '" . Url::to(['store-city-in-session']) . "',
                     type: 'POST',
                     data: { city: city, timestamp: " . time() . " },
+                    success: function() {
+                        $.ajax({
+                            url: '" . Url::to(['add-city']) . "', 
+                            type: 'POST',
+                            data: { city: city }, 
+                        });
+                    }
                 });
             });
-
-            $('#no').click(() => {
+        
+                    $('#no').click(() => {
                 $('#cityModal').modal('hide');
-                // Show modal to choose from all cities in Russia
-                $('#cityListModal').modal('show');
             });
-
+        
             $(document).on('click', '.choose-city', function(e) {
                 e.preventDefault();
                 var city = $(this).data('city');

@@ -65,14 +65,23 @@ $this->params['breadcrumbs'][] = $this->title;
                     <?php endif; ?>
                     <p class="review-text"><?= Html::encode($review->text) ?></p>
                 </div>
-                <div class="author-info">
-                    <a href="<?= Yii::$app->urlManager->createUrl(['site/author-info', 'authorId' => $review->id_author]) ?>" class="show-author-info">
+                <?php if (!Yii::$app->user->isGuest): ?>
+                    <div class="author-info">
+                        <a href="<?= Yii::$app->urlManager->createUrl(['site/author-info', 'authorId' => $review->id_author]) ?>" class="show-author-info">
+                            Автор: <?= Html::encode($review->author->fio) ?>
+                        </a>
+                        <span class="review-date">
+            Дата создания: <?= Yii::$app->formatter->asDate($review->date_create) ?>
+        </span>
+                    </div>
+                <?php else: ?>
+                    <div class="author-info">
                         Автор: <?= Html::encode($review->author->fio) ?>
-                    </a>
-                    <span class="review-date">
-                        Дата создания: <?= Yii::$app->formatter->asDate($review->date_create) ?>
-                    </span>
-                </div>
+                        <span class="review-date">
+            Дата создания: <?= Yii::$app->formatter->asDate($review->date_create) ?>
+        </span>
+                    </div>
+                <?php endif; ?>
             </div>
         <?php endforeach; ?>
     <?php else: ?>

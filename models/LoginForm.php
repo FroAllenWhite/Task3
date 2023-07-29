@@ -27,8 +27,6 @@ class LoginForm extends Model
         ];
     }
 
-
-
     public function login()
     {
         if ($this->validate()) {

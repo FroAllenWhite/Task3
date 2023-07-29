@@ -29,7 +29,6 @@ class City extends \yii\db\ActiveRecord
         ];
     }
 
-    // Один город имеет множество отзывов
     public function getReviews()
     {
         return $this->hasMany(Review::class, ['id_city' => 'id']);
