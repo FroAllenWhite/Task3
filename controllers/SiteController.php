@@ -285,4 +285,34 @@ class SiteController extends Controller
             'user' => $user,
         ]);
     }
+    public function actionEditReview($reviewId)
+    {
+        $review = Review::findOne($reviewId);
+
+        if ($review && $review->id_author === Yii::$app->user->id) {
+            if ($review->load(Yii::$app->request->post()) && $review->save()) {
+                Yii::$app->session->setFlash('reviewUpdated', 'Отзыв успешно обновлен');
+                return $this->redirect(['site/user']);
+            }
+
+            return $this->render('edit_review', [
+                'review' => $review,
+            ]);
+        } else {
+            throw new \yii\web\NotFoundHttpException('Отзыв не найден или у вас нет прав на его редактирование.');
+        }
+    }
+
+    public function actionConfirmDeleteReview($reviewId)
+    {
+        $review = Review::findOne($reviewId);
+
+        if ($review && $review->id_author === Yii::$app->user->id) {
+            $review->delete();
+            Yii::$app->session->setFlash('reviewDeleted', 'Отзыв успешно удален');
+            return $this->redirect(['site/user']);
+        } else {
+            throw new \yii\web\NotFoundHttpException('Отзыв не найден или у вас нет прав на его удаление.');
+        }
+    }
 }

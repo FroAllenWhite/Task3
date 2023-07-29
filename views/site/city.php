@@ -64,6 +64,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <?= Html::img(Yii::getAlias('@web/images/' . $review->img), ['class' => 'review-img']); ?>
                     <?php endif; ?>
                     <p class="review-text"><?= Html::encode($review->text) ?></p>
+                    <p class="review-rating">Оценка: <?= Html::encode($review->rating) ?></p> <!-- Add this line -->
                 </div>
                 <?php if (!Yii::$app->user->isGuest): ?>
                     <div class="author-info">
@@ -71,15 +72,15 @@ $this->params['breadcrumbs'][] = $this->title;
                             Автор: <?= Html::encode($review->author->fio) ?>
                         </a>
                         <span class="review-date">
-            Дата создания: <?= Yii::$app->formatter->asDate($review->date_create) ?>
-        </span>
+                        Дата создания: <?= Yii::$app->formatter->asDate($review->date_create) ?>
+                    </span>
                     </div>
                 <?php else: ?>
                     <div class="author-info">
                         Автор: <?= Html::encode($review->author->fio) ?>
                         <span class="review-date">
-            Дата создания: <?= Yii::$app->formatter->asDate($review->date_create) ?>
-        </span>
+                        Дата создания: <?= Yii::$app->formatter->asDate($review->date_create) ?>
+                    </span>
                     </div>
                 <?php endif; ?>
             </div>
