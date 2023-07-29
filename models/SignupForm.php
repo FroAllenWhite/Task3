@@ -91,7 +91,6 @@ class SignupForm extends Model
             $user->phone = $this->phone;
             $user->date_create = date('Y-m-d H:i:s');
 
-            // Save the user record to the database
             if ($user->save()) {
                 return true;
             }

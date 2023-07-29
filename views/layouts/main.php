@@ -41,6 +41,7 @@ $this->registerLinkTag(['rel' => 'icon', 'type' => 'image/x-icon', 'href' => Yii
         $menuItems[] = ['label' => 'Регистрация', 'url' => ['/site/signup']];
         $menuItems[] = ['label' => 'Войти', 'url' => ['/site/login']];
     } else {
+        $menuItems[] = ['label' => 'Профиль', 'url' => ['/site/user']];
         $menuItems[] = ['label' => 'Выйти (' . Yii::$app->user->identity->fio . ')', 'url' => ['/site/logout'], 'linkOptions' => ['data-method' => 'post']];
     }
 

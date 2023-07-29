@@ -17,6 +17,7 @@ $config = [
             'cookieValidationKey' => 'yxIfTI4UGOgYORtn63DtQxXGbNbsN-hU',
             'enableCsrfValidation' => false,
         ],
+
         'captcha' => [
             'class' => 'yii\captcha\CaptchaAction',
             'fixedVerifyCode' => YII_ENV_TEST ? 'testme' : null,

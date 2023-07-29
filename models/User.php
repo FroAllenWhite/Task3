@@ -69,4 +69,13 @@ class User extends ActiveRecord implements IdentityInterface
     {
         return Yii::$app->security->validatePassword($password, $this->password);
     }
+
+    /**
+     *
+     * @return \yii\db\ActiveQuery
+     */
+    public function getReviews()
+    {
+        return $this->hasMany(Review::class, ['id_author' => 'id']);
+    }
 }

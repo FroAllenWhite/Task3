@@ -12,8 +12,10 @@ use yii\debug\models\search\Log;
 use yii\filters\AccessControl;
 use yii\web\BadRequestHttpException;
 use yii\web\Controller;
+use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use yii\filters\VerbFilter;
+use yii\web\UploadedFile;
 
 
 class SiteController extends Controller
@@ -219,10 +221,14 @@ class SiteController extends Controller
             throw new \yii\web\NotFoundHttpException('Город не найден.');
         }
 
+
         $cityList = City::find()->orderBy(['name' => SORT_ASC])->all();
+
+
         $model = new Review();
 
         return $this->render('city', [
+            'city' => $city,
             'cityName' => $city->name,
             'model' => $model,
             'cityList' => $cityList,
@@ -231,15 +237,31 @@ class SiteController extends Controller
 
     public function actionSubmitReview()
     {
+        if (Yii::$app->user->isGuest) {
+            Yii::$app->session->setFlash('reviewError', 'Для отправки отзыва необходимо авторизоваться.');
+            return $this->redirect(['site/login']);
+        }
+
         $model = new Review();
 
-        if ($model->load(Yii::$app->request->post()) && $model->validate()) {
+        if ($model->load(Yii::$app->request->post())) {
+            $model->imageFile = UploadedFile::getInstance($model, 'img');
+
+            if (!$model->imageFile) {
+                $model->img = 'images/no-image.png';
+            } else {
+                $imageName = Yii::$app->security->generateRandomString(12);
+                $model->img = 'images/' . $imageName . '.' . $model->imageFile->extension;
+                $model->imageFile->saveAs($model->img);
+            }
+
             $selectedCityId = $model->id_city;
             $city = City::findOne($selectedCityId);
 
             if (!$city) {
                 throw new \yii\web\NotFoundHttpException('Город не найден.');
             }
+
             $model->id_author = Yii::$app->user->identity->id;
 
             if ($model->save()) {
@@ -255,5 +277,61 @@ class SiteController extends Controller
             'cityList' => $cityList,
         ]);
     }
+    public function actionCityReviews($cityId)
+    {
+        $city = City::findOne($cityId);
 
+        if (!$city) {
+            throw new NotFoundHttpException('Город не найден.');
+        }
+
+        $reviews = Review::find()->where(['id_city' => $cityId])->all();
+
+        return $this->render('city_reviews', [
+            'city' => $city,
+            'reviews' => $reviews,
+        ]);
+    }
+
+    public function actionAuthorInfo($authorId)
+    {
+        $author = User::findOne($authorId);
+
+        if (!$author) {
+            throw new NotFoundHttpException('Автор не найден.');
+        }
+
+        return $this->renderAjax('author_info', [
+            'author' => $author,
+        ]);
+    }
+    public function actionAuthorReviews($authorId)
+    {
+        $author = User::findOne($authorId);
+
+        if (!$author) {
+            throw new NotFoundHttpException('Автор не найден.');
+        }
+
+        $reviews = Review::find()->where(['id_author' => $authorId])->all();
+
+        return $this->render('author_reviews', [
+            'author' => $author,
+            'reviews' => $reviews,
+        ]);
+    }
+
+    public function actionUser()
+    {
+        $userId = Yii::$app->user->id;
+        $user = User::findOne($userId);
+
+        if (!$user) {
+            throw new NotFoundHttpException('Пользователь не найден.');
+        }
+
+        return $this->render('user', [
+            'user' => $user,
+        ]);
+    }
 }
